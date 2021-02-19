@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ page.title }}</title>
+    <style>
+        body {
+            background-color: black;
+            color: #eee;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+        img {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 99%;
+            max-height: 99%;
+            margin: 20px auto;
+        }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center">/photography</h1>
+    <div style="text-align: center">{{ content }}</div>
+
+    {% for image in site.images %}
+        <img src="/assets/images/{{ image }}" loading="lazy" alt="{{ image }}" />
+    {% endfor %}
+
+    <div style="text-align: center">&copy; {{ page.copyright }}</div>
+  </body>
+</html>
