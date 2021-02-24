@@ -13,8 +13,8 @@
             display: block;
             width: auto;
             height: auto;
-            max-width: 99%;
-            max-height: 99%;
+            max-width: 66.66%;
+            max-height: 66.66%;
             margin: 20px auto;
         }
     </style>
@@ -24,7 +24,7 @@
     <div style="text-align: center">{{ content }}</div>
 
     {% for image in site.images %}
-        <img src="images/{{ image }}" loading="lazy" alt="{{ image }}" />
+        <img loading="lazy" src="images/{{ image }}" alt="{{ image }}" />
     {% endfor %}
 
     <div style="text-align: center">&copy; {{ page.copyright }}</div>
