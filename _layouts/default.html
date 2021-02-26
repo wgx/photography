@@ -17,6 +17,10 @@
             max-height: 66.66%;
             margin: 20px auto;
         }
+        copy {
+          font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+          font-size: 0.75rem;
+        }
     </style>
   </head>
   <body>
@@ -25,6 +29,7 @@
 
     {% for image in site.images %}
         <img loading="lazy" src="images/{{ image }}" alt="{{ image }}" />
+        <p class="copy">{{ image }}</p>
         <br />
     {% endfor %}
 
