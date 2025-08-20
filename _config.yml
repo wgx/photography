@@ -1,0 +1,12 @@
+# Basic Site Settings
+title: photography by will grant
+description: >- # this means to ignore newlines until "baseurl:"
+  selected photos from 2008 - 2025
+baseurl: "/photography" # the subpath of your site, e.g. /blog
+url: "https://wgx.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
+# --- Build settings ---
+# This is the theme I'm assuming you're starting with.
+# If you have a different theme, change this line.
+theme: minima
+plugins:
+  - jekyll-feed
