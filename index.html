@@ -22,7 +22,8 @@ layout: default
     transition: background-color 0.3s ease, color 0.3s ease;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     line-height: 1.6;
-    padding: 2rem;
+    /* Reduced padding to let the gallery use more width */
+    padding: 1rem;
   }
 
   h1 {
@@ -32,20 +33,21 @@ layout: default
 
   .gallery-grid {
     display: grid;
-    /* This creates a single column. */
-    grid-template-columns: 1fr;
-    gap: 2rem; /* Increased gap for a cleaner look */
+    /* This creates a three-column layout */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem; /* Adjusted gap for a 3-column view */
     
-    /* Constrain width and center the column on larger screens */
-    max-width: 900px;
+    /* Remove max-width to use most of the viewport */
+    width: 100%;
     margin: 0 auto;
   }
 
   .gallery-item img {
     width: 100%;
-    height: auto; /* Allow height to adjust automatically */
+    /* height: auto; maintains the image's aspect ratio */
+    height: auto; 
     object-fit: cover;
-    border-radius: 3px; /* Softer corners */
+    border-radius: 12px; /* Softer corners */
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     transition: transform 0.2s ease-in-out;
   }
