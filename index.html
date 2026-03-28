@@ -1,72 +1,374 @@
 ---
-layout: default
+layout: null
 ---
-<h2>{{ site.description }}</h2>
-<div class="gallery-grid">
-  {% for file in site.static_files %}
-    {% if file.path contains 'assets/gallery/' %}
-      <div class="gallery-item">
-        <a href="{{ site.baseurl }}{{ file.path }}" target="_blank">
-          <img src="{{ site.baseurl }}{{ file.path }}" alt="Gallery image">
-        </a>
-      </div>
-    {% endif %}
-  {% endfor %}
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wgx / photography</title>
+    <style>
+        /* Visual: Dark mode only, small crisp monospaced font */
+        :root {
+            --bg-color: #000000;
+            --text-color: #eeeeee;
+            --border-color: #333333;
+            --accent-color: #ffffff;
+            --hover-bg: #1a1a1a;
+        }
 
-<style>
-  /* --- Light Mode Defaults --- */
-  body {
-    background-color: #ffffff;
-    color: #111111;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    line-height: 1.6;
-    /* Reduced padding to let the gallery use more width */
-    padding: 1rem;
-  }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-  h1 {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'SF Mono', 'Roboto Mono', 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-  .gallery-grid {
-    display: grid;
-    /* This creates a three-column layout */
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem; /* Adjusted gap for a 3-column view */
-    
-    /* Remove max-width to use most of the viewport */
-    width: 100%;
-    margin: 0 auto;
-  }
+        a {
+            color: var(--text-color);
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
 
-  .gallery-item img {
-    width: 100%;
-    /* height: auto; maintains the image's aspect ratio */
-    height: auto; 
-    object-fit: cover;
-    border-radius: 12px; /* Softer corners */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease-in-out;
-  }
+        a:hover {
+            color: var(--accent-color);
+        }
 
-  .gallery-item img:hover {
-      transform: scale(1.02);
-  }
+        /* 1px solid lines as separators */
+        header, .controls, .site-info {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
 
-  /* --- Dark Mode --- */
-  @media (prefers-color-scheme: dark) {
-    body {
-      background-color: #121212;
-      color: #f0f0f0;
-    }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
 
-    .gallery-item img {
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      /* Add a subtle border to separate images from the dark background */
-      border: 1px solid #333;
-    }
-  }
-</style>
+        h1 {
+            font-size: 14px;
+            font-weight: normal;
+            color: var(--accent-color);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .controls {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        /* Search Input */
+        input[type="text"] {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 12px;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            max-width: 300px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* Gallery Grid */
+        main {
+            padding: 1.5rem;
+            min-height: 60vh;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .gallery-item {
+            cursor: zoom-in;
+            display: block; /* For JS filtering */
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item.hidden {
+            display: none;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.2s;
+        }
+
+        .gallery-item:hover img {
+            border-color: var(--accent-color);
+        }
+
+        .meta {
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+        }
+
+        /* Lightbox */
+        #lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 10, 10, 0.95);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #lightbox.active {
+            display: flex;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 80vh;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .lightbox-controls {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .lightbox-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: inherit;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* Site Info */
+        .site-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .site-info {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>wgx / photography</h1>
+        <div>selected photos from 2008 to 2026</div>
+    </header>
+
+    <div class="site-info">
+        <div>
+            All photographs are licensed under 
+            <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0</a>.
+        </div>
+        <div>
+            <a href="https://tally.so/r/mR99AP" target="_blank" rel="noopener noreferrer">Contact / Print Requests →</a>
+        </div>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="type to search...">
+    </div>
+
+    <main>
+        <div class="gallery" id="gallery">
+              {% for image in site.static_files %}
+                {% if image.path contains 'assets/gallery/' %}
+                  <div class="gallery-item" data-title="{{ image.name }}">
+                      <img src="{{ site.baseurl }}{{ image.path }}" alt="{{ image.name }}" loading="lazy" />
+                      <div class="meta">
+                          <span>{{ image.name | truncate: 32 }}</span>
+                      </div>
+                  </div>
+                {% endif %}
+              {% endfor %}         
+        </div>
+    </main>
+
+    <!-- Lightbox Element -->
+    <div id="lightbox">
+        <button class="lightbox-close" id="lbClose">&times;</button>
+        <img id="lbImage" src="" alt="Lightbox View">
+        <div class="lightbox-controls">
+            <button class="lightbox-btn" id="lbPrev">Prev</button>
+            <button class="lightbox-btn" id="lbShuffle">Shuffle</button>
+            <button class="lightbox-btn" id="lbNext">Next</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const items = document.querySelectorAll('.gallery-item');
+            
+            let searchQuery = '';
+            
+            // Filtering Logic
+            function filterGallery() {
+                items.forEach(item => {
+                    const title = item.getAttribute('data-title').toLowerCase();
+                    
+                    const matchesSearch = title.includes(searchQuery);
+
+                    if (matchesSearch) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+                updateVisibleItems();
+            }
+
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                filterGallery();
+            });
+
+            // Lightbox Logic
+            const lightbox = document.getElementById('lightbox');
+            const lbImage = document.getElementById('lbImage');
+            const lbPrev = document.getElementById('lbPrev');
+            const lbNext = document.getElementById('lbNext');
+            const lbShuffle = document.getElementById('lbShuffle');
+            const lbClose = document.getElementById('lbClose');
+
+            let visibleItems = [];
+            let currentIndex = 0;
+
+            function updateVisibleItems() {
+                visibleItems = Array.from(items).filter(item => !item.classList.contains('hidden'));
+            }
+
+            function openLightbox(index) {
+                if (visibleItems.length === 0) return;
+                currentIndex = index;
+                const imgSrc = visibleItems[currentIndex].querySelector('img').src;
+                lbImage.src = imgSrc;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            function showNext() {
+                if (visibleItems.length === 0) return;
+                currentIndex = (currentIndex + 1) % visibleItems.length;
+                openLightbox(currentIndex);
+            }
+
+            function showPrev() {
+                if (visibleItems.length === 0) return;
+                currentIndex = (currentIndex - 1 + visibleItems.length) % visibleItems.length;
+                openLightbox(currentIndex);
+            }
+
+            function showShuffle() {
+                if (visibleItems.length <= 1) return;
+                let newIndex = currentIndex;
+                // Ensure we pick a different image if possible
+                while (newIndex === currentIndex) {
+                    newIndex = Math.floor(Math.random() * visibleItems.length);
+                }
+                openLightbox(newIndex);
+            }
+
+            // Event Listeners for Gallery Items
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Find the index of the clicked item within the *visible* items array
+                    const index = visibleItems.indexOf(item);
+                    if (index !== -1) {
+                        openLightbox(index);
+                    }
+                });
+            });
+
+            // Lightbox Controls Event Listeners
+            lbClose.addEventListener('click', closeLightbox);
+            lbNext.addEventListener('click', showNext);
+            lbPrev.addEventListener('click', showPrev);
+            lbShuffle.addEventListener('click', showShuffle);
+
+            // Close lightbox on clicking background
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            // Keyboard Navigation
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('active')) return;
+                
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowRight') showNext();
+                if (e.key === 'ArrowLeft') showPrev();
+                // Press 'S' for shuffle
+                if (e.key === 's' || e.key === 'S') showShuffle();
+            });
+
+            // Initial setup
+            updateVisibleItems();
+        });
+    </script>
+</body>
+</html>
