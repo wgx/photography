@@ -178,6 +178,11 @@ layout: null
             letter-spacing: 1px;
         }
 
+        .lightbox-btn.copied {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
         .lightbox-close {
             position: absolute;
             top: 1.5rem;
@@ -249,6 +254,7 @@ layout: null
             <button class="lightbox-btn" id="lbPrev">Prev</button>
             <button class="lightbox-btn" id="lbShuffle">Shuffle</button>
             <button class="lightbox-btn" id="lbNext">Next</button>
+            <button class="lightbox-btn" id="lbCopyLink">Copy link</button>
         </div>
     </div>
 
@@ -287,6 +293,7 @@ layout: null
             const lbNext = document.getElementById('lbNext');
             const lbShuffle = document.getElementById('lbShuffle');
             const lbClose = document.getElementById('lbClose');
+            const lbCopyLink = document.getElementById('lbCopyLink');
 
             let visibleItems = [];
             let currentIndex = 0;
@@ -298,15 +305,19 @@ layout: null
             function openLightbox(index) {
                 if (visibleItems.length === 0) return;
                 currentIndex = index;
-                const imgSrc = visibleItems[currentIndex].querySelector('img').src;
+                const item = visibleItems[currentIndex];
+                const imgSrc = item.querySelector('img').src;
+                const filename = item.getAttribute('data-title');
                 lbImage.src = imgSrc;
                 lightbox.classList.add('active');
                 document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                history.replaceState(null, '', '#photo=' + encodeURIComponent(filename));
             }
 
             function closeLightbox() {
                 lightbox.classList.remove('active');
                 document.body.style.overflow = '';
+                history.replaceState(null, '', window.location.pathname);
             }
 
             function showNext() {
@@ -347,6 +358,16 @@ layout: null
             lbNext.addEventListener('click', showNext);
             lbPrev.addEventListener('click', showPrev);
             lbShuffle.addEventListener('click', showShuffle);
+            lbCopyLink.addEventListener('click', () => {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    lbCopyLink.textContent = 'Copied!';
+                    lbCopyLink.classList.add('copied');
+                    setTimeout(() => {
+                        lbCopyLink.textContent = 'Copy link';
+                        lbCopyLink.classList.remove('copied');
+                    }, 2000);
+                });
+            });
 
             // Close lightbox on clicking background
             lightbox.addEventListener('click', (e) => {
@@ -368,6 +389,18 @@ layout: null
 
             // Initial setup
             updateVisibleItems();
+
+            // Open photo from URL hash on page load (e.g. #photo=filename.jpg)
+            const hash = window.location.hash;
+            if (hash.startsWith('#photo=')) {
+                const filename = decodeURIComponent(hash.slice(7));
+                const allItems = Array.from(items);
+                const target = allItems.find(item => item.getAttribute('data-title') === filename);
+                if (target) {
+                    const index = visibleItems.indexOf(target);
+                    if (index !== -1) openLightbox(index);
+                }
+            }
         });
     </script>
 </body>
