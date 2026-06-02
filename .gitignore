@@ -1,3 +1,7 @@
 .DS_Store
 assets/.DS_Store
 assets/gallery/.DS_Store
+
+# Generated at deploy time by scripts/build_gallery_manifest.py
+_data/gallery.json
+_site/

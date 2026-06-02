@@ -233,16 +233,18 @@ layout: null
 
     <main>
         <div class="gallery" id="gallery">
-              {% for image in site.static_files %}
-                {% if image.path contains 'assets/gallery/' %}
-                  <div class="gallery-item" data-title="{{ image.name }}">
-                      <img src="{{ site.baseurl }}{{ image.path }}" alt="{{ image.name }}" loading="lazy" />
-                      <div class="meta">
-                          <span>{{ image.name | truncate: 32 }}</span>
-                      </div>
-                  </div>
-                {% endif %}
-              {% endfor %}         
+              {% comment %}
+                Ordered by scripts/build_gallery_manifest.py: newest commit date
+                first, filename A->Z breaking ties. Regenerated on every deploy.
+              {% endcomment %}
+              {% for image in site.data.gallery %}
+                <div class="gallery-item" data-title="{{ image.name }}">
+                    <img src="{{ site.baseurl }}{{ image.path }}" alt="{{ image.name }}" loading="lazy" />
+                    <div class="meta">
+                        <span>{{ image.name | truncate: 32 }}</span>
+                    </div>
+                </div>
+              {% endfor %}
         </div>
     </main>
 
