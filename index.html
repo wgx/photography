@@ -396,11 +396,21 @@ layout: null
             const hash = window.location.hash;
             if (hash.startsWith('#photo=')) {
                 const filename = decodeURIComponent(hash.slice(7));
-                const allItems = Array.from(items);
-                const target = allItems.find(item => item.getAttribute('data-title') === filename);
+                const target = Array.from(items).find(item => item.getAttribute('data-title') === filename);
                 if (target) {
-                    const index = visibleItems.indexOf(target);
-                    if (index !== -1) openLightbox(index);
+                    // The image might be lazy-loaded and not yet in the browser cache.
+                    // To prevent opening a blank lightbox, we preload the image first.
+                    const imgSrc = target.querySelector('img').src;
+                    const preloader = new Image();
+                    preloader.onload = () => {
+                        // Now that the image is loaded, find its index in the *currently visible*
+                        // items and open the lightbox.
+                        const index = visibleItems.indexOf(target);
+                        if (index !== -1) {
+                            openLightbox(index);
+                        }
+                    };
+                    preloader.src = imgSrc;
                 }
             }
         });
